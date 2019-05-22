@@ -12,6 +12,7 @@
                        @keyup.tab.stop="closeOut"
                        @keyup.esc.stop="closeOut"
                        @keyup.up="movePointerUp"
+                       @mouseout="handleClickOutside($event)"
                        :placeholder="placeholder"
                        autocomplete="off"
                        :required="required"
@@ -185,11 +186,13 @@ export default {
             option[this.optionLabel]
               .toString()
               .toLowerCase()
-              .includes(this.searchText.toString().toLowerCase()) ||
+              .replace(/\s+/g, "")
+              .includes(this.searchText.toString().toLowerCase().replace(/\s+/g, "")) ||
               option[this.optionKey]
               .toString()
               .toLowerCase()
-              .includes(this.searchText.toString().toLowerCase())
+              .replace(/\s+/g, "")
+              .includes(this.searchText.toString().toLowerCase().replace(/\s+/g, ""))
           )
         }
         
@@ -197,20 +200,23 @@ export default {
           return option[this.optionLabel]
             .toString()
             .toLowerCase()
-            .includes(this.searchText.toString().toLowerCase())
+            .replace(/\s+/g, "")
+            .includes(this.searchText.toString().toLowerCase().replace(/\s+/g, ""))
         }
         
         if (this.optionKey) {
           option[this.optionKey]
             .toString()
             .toLowerCase()
-            .includes(this.searchText.toString().toLowerCase())
+            .replace(/\s+/g, "")
+            .includes(this.searchText.toString().toLowerCase().replace(/\s+/g, ""))
         }
         
         return option
           .toString()
           .toLowerCase()
-          .includes(this.searchText.toString().toLowerCase())
+          .replace(/\s+/g, "")
+          .includes(this.searchText.toString().toLowerCase().replace(/\s+/g, ""))
       }
     }
   },
@@ -350,12 +356,21 @@ export default {
              });
          },
          handleClickOutside(e) {
-             if (this.$el.contains(e.target)) {
+              if (e.type != "mouseout" || (this.matchingOptions && this.matchingOptions.length)) {
                  return;
-             }
+              }
+              this.dropdownOpen = false;
+              var findType = this.options.find(x=>x.name === this.searchText);
 
-             this.dropdownOpen = false;
-             this.searchText = null;
+              if (this.selectedOption == null && findType == null && this.searchText != null && this.searchText.trim() != "") {
+                this.selectedOption = {
+                  id: null,
+                  name: this.searchText
+                };
+              }
+              if(findType != null) {
+                  this.selectedOption = findType;
+              }
          }
      }
  };
